@@ -2,6 +2,7 @@ package com.ami.loans.controller;
 
 import com.ami.loans.constants.LoansConstants;
 import com.ami.loans.dto.ErrorResponseDTO;
+import com.ami.loans.dto.LoansContactInfoDTO;
 import com.ami.loans.dto.LoansDTO;
 import com.ami.loans.dto.ResponseDTO;
 import com.ami.loans.service.LoansService;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +37,15 @@ public class LoansController {
     public LoansController(LoansService loansService){
         this.loansService=loansService;
     }
+
+    @Value("${build.version}")
+    private String buildVersion;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private LoansContactInfoDTO loansContactInfoDTO;
 
     @Operation(
             summary="Create Loan REST API",
@@ -160,4 +173,81 @@ public class LoansController {
         }
     }
 
+    @Operation(
+            summary = "Get Loans Service Build Version Information",
+            description = "Build Version details of Loans Service"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP INTERNAL SERVER ERROR",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponseDTO.class
+                            )
+                    )
+            )
+    })
+    @GetMapping("/build-info")
+    public ResponseEntity<String> getBuildInfo(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(buildVersion);
+    }
+
+    @Operation(
+            summary = "Get Maven Version Information",
+            description = "Maven Version details of Loans Service"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP INTERNAL SERVER ERROR",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponseDTO.class
+                            )
+                    )
+            )
+    })
+    @GetMapping("/maven-version")
+    public ResponseEntity<String> getMavenVersion(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(environment.getProperty("M2_HOME"));
+    }
+
+    @Operation(
+            summary = "Get Loans Contact Information",
+            description = "Contact Info details in case of any issues"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "HTTP Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "HTTP INTERNAL SERVER ERROR",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponseDTO.class
+                            )
+                    )
+            )
+    })
+    @GetMapping("/contact-info")
+    public ResponseEntity<LoansContactInfoDTO> getContactInfo(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(loansContactInfoDTO);
+    }
 }
